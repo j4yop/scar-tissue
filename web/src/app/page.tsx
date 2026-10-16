@@ -36,6 +36,12 @@ export default function Home() {
         >
           Connect your agent
         </a>
+        <a
+          href="/import"
+          className="rounded-xl border border-orange-500/30 px-6 py-3 text-sm font-semibold text-orange-200 transition hover:border-orange-500/60 hover:bg-orange-600/10"
+        >
+          Import from Wispr
+        </a>
       </div>
 
       <p className="mt-12 text-xs text-zinc-600">

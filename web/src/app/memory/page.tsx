@@ -50,6 +50,9 @@ export default function MemoryPage() {
         <a href="/connect" className="text-sm text-zinc-500 transition hover:text-zinc-300">
           connect
         </a>
+        <a href="/import" className="text-sm text-zinc-500 transition hover:text-zinc-300">
+          wispr import
+        </a>
       </div>
 
       <h1 className="text-3xl font-bold tracking-tight text-zinc-100">The memory</h1>
