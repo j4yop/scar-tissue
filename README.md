@@ -175,6 +175,7 @@ AI coding agents are amnesiacs. They repeat the same mistakes across sessions �
 | Date | Update |
 |---|---|
 | 2026-10-16 | Research verdict finalized after competitive sweep (Speqify/BugIt killed the naive idea; agent-memory gap found). Council round 2: 5/5 proceed. Repo created with full blueprint. |
+| 2026-10-16 | Council round 3: passthru (existing project) scored head-to-head vs scar-tissue → **4–1 for scar-tissue**. Passthru not submitted (predates challenge); folded in as prior work + measurement spine. See `docs/research/PASSTHRU-COMPARISON.md`. |
 
 ---
 
