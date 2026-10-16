@@ -34,7 +34,7 @@ export default function Home() {
 
       <p className="mt-12 text-xs text-zinc-600">
         no sign-in · nothing hardcoded — every capture runs the live structuring
-        pipeline · MCP + rules export coming in Stage 3
+        pipeline · rules export live · MCP server coming in Stage 3
       </p>
     </main>
   );

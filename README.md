@@ -163,7 +163,7 @@ AI coding agents are amnesiacs. They repeat the same mistakes across sessions �
 - [x] Spec dictated into Wispr Flow
 - [x] Day 1: scaffold Next.js app
 - [x] Core pipeline: paste → structure → card (live on Vercel)
-- [ ] Memory UI + landing
+- [x] Memory UI + landing (search, tag + status filters, close-the-loop fix note, retry)
 - [ ] MCP server (`/mcp`)
 - [x] Rules-file export (`/api/export/claude-md`, `/api/export/cursorrules` — live)
 - [ ] Dogfood 30+ real scars
@@ -178,6 +178,7 @@ AI coding agents are amnesiacs. They repeat the same mistakes across sessions �
 | 2026-10-16 | Council round 3: passthru (existing project) scored head-to-head vs scar-tissue → **4–1 for scar-tissue**. Passthru not submitted (predates challenge); folded in as prior work + measurement spine. See `docs/research/PASSTHRU-COMPARISON.md`. |
 | 2026-10-16 | **Stage 0+1 code complete**: Next.js 16 app in `web/` — shared zod Lesson schema, Drizzle + Neon Postgres (provisioned via Vercel Marketplace), live Gemini structuring pipeline (`web/src/lib/llm.ts`) with retries + honest-failure path (raw dictate saved as `unstructured`, retry endpoint), capture page, memory search page, live rules export (`/api/export/claude-md`, `/api/export/cursorrules`), IP rate-limit. **Pending: real GEMINI_API_KEY** (the one on disk is a placeholder) — then end-to-end live test + Vercel deploy. |
 | 2026-10-17 | **Stage 1 live end-to-end on production.** Key auth verified (`AQ.`-format key works via `x-goog-api-key`); model moved to `gemini-3-flash-preview` (`gemini-2.5-flash` is retired for new accounts); AI SDK v4 fix — API key belongs on `createGoogle(...)`, not the per-call model fn. Fixed a production-only failure caused by a quoted key value being pushed to Vercel (normalized `.env.local`, re-added env). Deployed to Vercel (`web/` root); disabled Deployment Protection so the URL is public. **Verified live on prod**: real dictation → structured card (201 in ~5s), search, tag filter, rules export, and the retry loop (`unstructured` → `open`). DB cleaned to 4 real lessons. Prod: https://scar-tissue-main-ec61.vercel.app |
+| 2026-10-17 | **Stage 2 — the memory loop closes.** `PATCH /api/lessons/[id]` accepts a dictated fix note (real DB update) and sets `status: closed`; the card gained a close-the-loop input and a "retry structuring" button for `unstructured` captures. Verified on prod: close (200), empty note (422), missing id (404), status filtering. |
 
 ---
 
