@@ -30,11 +30,17 @@ export default function Home() {
         >
           Browse the memory
         </a>
+        <a
+          href="/connect"
+          className="rounded-xl border border-white/10 px-6 py-3 text-sm font-semibold text-zinc-200 transition hover:border-white/25 hover:bg-white/5"
+        >
+          Connect your agent
+        </a>
       </div>
 
       <p className="mt-12 text-xs text-zinc-600">
         no sign-in · nothing hardcoded — every capture runs the live structuring
-        pipeline · rules export live · MCP server coming in Stage 3
+        pipeline · MCP server + rules export live
       </p>
     </main>
   );

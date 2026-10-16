@@ -47,6 +47,9 @@ export default function MemoryPage() {
         <a href="/capture" className="text-sm text-zinc-500 transition hover:text-zinc-300">
           + capture
         </a>
+        <a href="/connect" className="text-sm text-zinc-500 transition hover:text-zinc-300">
+          connect
+        </a>
       </div>
 
       <h1 className="text-3xl font-bold tracking-tight text-zinc-100">The memory</h1>

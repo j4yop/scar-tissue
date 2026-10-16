@@ -13,6 +13,7 @@
 | | |
 |---|---|
 | **Live demo** | **https://scar-tissue-main-ec61.vercel.app** — no sign-in, real capture loop, judge-usable in 60s |
+| **MCP server** | **https://scar-tissue-main-ec61.vercel.app/api/mcp** — stateless streamable HTTP, tools: `search_memory`, `get_lesson`, `memory_stats` |
 | **Demo video** | _coming — Day 10_ |
 | **Hackathon submission** | wemakedevs.org/wispr |
 
@@ -90,7 +91,7 @@ AI coding agents are amnesiacs. They repeat the same mistakes across sessions �
                                ▼                           ▼
    ┌────────────────────────────────────────────┐   ┌─────────────────────┐
    │              SCAR TISSUE WEB APP            │   │     MCP SERVER      │
-   │  (Next.js on Vercel)                        │   │  /mcp route         │
+   │  (Next.js on Vercel)                        │   │  /api/mcp route     │
    │                                             │   │  search_memory()    │
    │  Capture page ──► LLM structuring ──► Card  │──►│  get_lesson()       │
    │  (paste + log snippet)   (structured out)   │   │  (read: public,     │
@@ -122,7 +123,7 @@ AI coding agents are amnesiacs. They repeat the same mistakes across sessions �
 | UI | Tailwind CSS | Speed; the lesson card is the money shot |
 | DB | **Neon Postgres + Drizzle ORM** (provisioned via Vercel Marketplace) | Zero-ops, typed schema, free tier |
 | LLM | **Gemini (`gemini-3-flash-preview`) via Vercel AI SDK** (structured output / zod) | Reliable schema-constrained extraction |
-| MCP | **`@modelcontextprotocol/sdk`** — streamable HTTP, stateless route | The 2026-standard way agents consume tools |
+| MCP | **`mcp-handler` v2** (`@modelcontextprotocol/server` v2) — stateless streamable HTTP, 2026-07-28 spec + 2025 fallback | The 2026-standard way agents consume tools |
 | Dictation | **Wispr Flow** | The capture layer; the hackathon's thesis |
 | Hosting | **Vercel** | Live-link-on-judging-day reliability |
 | Language | TypeScript end-to-end | One type system from card schema → MCP tool args |
@@ -136,7 +137,7 @@ AI coding agents are amnesiacs. They repeat the same mistakes across sessions �
 | **0. Spec by voice** | Day 1 | Dictate this entire spec into Wispr Flow; register; scaffold | This repo exists; spec dictated |
 | **1. Core pipeline** | Days 2–3 | Paste → LLM → lesson card; honest-failure + retry path; real captures only | Card renders from dictated text |
 | **2. Memory UI** | Days 4–5 | Search, tags, closed loop, landing page (zero jargon, zero sign-in) | Judge-usable in 60s |
-| **3. MCP server** | Day 6 | Stateless `/mcp` route; test with MCP Inspector → real Claude Code | Agent queries memory live |
+| **3. MCP server** | Day 6 | Stateless `/api/mcp` route; test with MCP Inspector → real Claude Code | Agent queries memory live |
 | **4. Rules export** | Day 7 | CLAUDE.md/.cursorrules generator | Lesson lands deterministically |
 | **5. Dogfood hard** | Days 8–9 | Every real bug/lesson from this build → dictated card (30+ entries) | Seed data is *real*; usage card grows |
 | **6. Demo video** | Day 10 | 2-min video, shot list in `docs/05-roadmap.md` | Swerve looks real, no cuts |
@@ -164,8 +165,8 @@ AI coding agents are amnesiacs. They repeat the same mistakes across sessions �
 - [x] Day 1: scaffold Next.js app
 - [x] Core pipeline: paste → structure → card (live on Vercel)
 - [x] Memory UI + landing (search, tag + status filters, close-the-loop fix note, retry)
-- [ ] MCP server (`/mcp`)
-- [x] Rules-file export (`/api/export/claude-md`, `/api/export/cursorrules` — live)
+- [x] MCP server (`/api/mcp` — `search_memory`, `get_lesson`, `memory_stats`; live on prod)
+- [x] Rules-file export (`/api/export/claude-md`, `/api/export/cursorrules` — live) + `/connect` page
 - [ ] Dogfood 30+ real scars
 - [ ] Demo video
 - [ ] Submit
@@ -179,6 +180,7 @@ AI coding agents are amnesiacs. They repeat the same mistakes across sessions �
 | 2026-10-16 | **Stage 0+1 code complete**: Next.js 16 app in `web/` — shared zod Lesson schema, Drizzle + Neon Postgres (provisioned via Vercel Marketplace), live Gemini structuring pipeline (`web/src/lib/llm.ts`) with retries + honest-failure path (raw dictate saved as `unstructured`, retry endpoint), capture page, memory search page, live rules export (`/api/export/claude-md`, `/api/export/cursorrules`), IP rate-limit. **Pending: real GEMINI_API_KEY** (the one on disk is a placeholder) — then end-to-end live test + Vercel deploy. |
 | 2026-10-17 | **Stage 1 live end-to-end on production.** Key auth verified (`AQ.`-format key works via `x-goog-api-key`); model moved to `gemini-3-flash-preview` (`gemini-2.5-flash` is retired for new accounts); AI SDK v4 fix — API key belongs on `createGoogle(...)`, not the per-call model fn. Fixed a production-only failure caused by a quoted key value being pushed to Vercel (normalized `.env.local`, re-added env). Deployed to Vercel (`web/` root); disabled Deployment Protection so the URL is public. **Verified live on prod**: real dictation → structured card (201 in ~5s), search, tag filter, rules export, and the retry loop (`unstructured` → `open`). DB cleaned to 4 real lessons. Prod: https://scar-tissue-main-ec61.vercel.app |
 | 2026-10-17 | **Stage 2 — the memory loop closes.** `PATCH /api/lessons/[id]` accepts a dictated fix note (real DB update) and sets `status: closed`; the card gained a close-the-loop input and a "retry structuring" button for `unstructured` captures. Verified on prod: close (200), empty note (422), missing id (404), status filtering. |
+| 2026-10-17 | **Stage 3 — MCP server + connect page live.** `mcp-handler` v2 (`@modelcontextprotocol/server` v2, zod 4 — the current 2026-07-28 spec, stateless, with the 2025 streamable-HTTP fallback) serves read-only tools `search_memory`, `get_lesson`, `memory_stats` from the same live DB. Extracted `src/lib/lessons.ts` so the API and MCP share one search implementation. New `/connect` page (MCP URL + config snippets for HTTP/stdio clients + rules-file links). Verified on prod: `initialize`, `tools/list`, `tools/call` all return real data. |
 
 ---
 

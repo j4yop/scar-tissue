@@ -3,19 +3,10 @@ import { db } from "@/db";
 import { lessons } from "@/db/schema";
 import { structureLesson, StructuringError, isMeaningfulLesson, describeStructuringError } from "@/lib/llm";
 import { rateLimit, clientIp } from "@/lib/ratelimit";
-import { lessonRowSchema, type LessonRow } from "@/lib/schema";
-import { desc, ilike, or, sql, and, eq } from "drizzle-orm";
+import { toRow, searchLessons } from "@/lib/lessons";
 import { randomBytes } from "crypto";
 
 export const maxDuration = 60;
-
-function toRow(row: typeof lessons.$inferSelect): LessonRow {
-  return lessonRowSchema.parse({
-    ...row,
-    createdAt: row.createdAt,
-    tags: row.tags ?? [],
-  });
-}
 
 const newId = () => `ls_${randomBytes(6).toString("hex")}`;
 
@@ -117,34 +108,11 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const q = url.searchParams.get("q")?.trim();
   const tag = url.searchParams.get("tag")?.trim();
-  const status = url.searchParams.get("status")?.trim();
+  const statusParam = url.searchParams.get("status")?.trim();
   const limit = Math.min(Number(url.searchParams.get("limit") ?? 50), 100);
 
-  const filters = [];
-  if (q) {
-    filters.push(
-      or(
-        ilike(lessons.rule, `%${q}%`),
-        ilike(lessons.why, `%${q}%`),
-        ilike(lessons.wrong, `%${q}%`),
-        ilike(lessons.right, `%${q}%`),
-        ilike(lessons.rawTranscript, `%${q}%`)
-      )
-    );
-  }
-  if (tag) {
-    filters.push(sql`${lessons.tags} @> ${JSON.stringify([tag])}::jsonb`);
-  }
-  if (status === "open" || status === "closed") {
-    filters.push(eq(lessons.status, status));
-  }
+  const status = statusParam === "open" || statusParam === "closed" ? statusParam : undefined;
 
-  const rows = await db
-    .select()
-    .from(lessons)
-    .where(filters.length ? and(...filters) : undefined)
-    .orderBy(desc(lessons.createdAt))
-    .limit(limit);
-
-  return NextResponse.json({ lessons: rows.map(toRow) });
+  const rows = await searchLessons({ q, tag, status, limit });
+  return NextResponse.json({ lessons: rows });
 }
