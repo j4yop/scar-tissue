@@ -12,7 +12,7 @@
 
 | | |
 |---|---|
-| **Live demo** | _coming — Day 3_ (no sign-in, seeded with real scars, judge-usable in 60 seconds) |
+| **Live demo** | **https://scar-tissue-main-ec61.vercel.app** — no sign-in, real capture loop, judge-usable in 60s |
 | **Demo video** | _coming — Day 10_ |
 | **Hackathon submission** | wemakedevs.org/wispr |
 
@@ -102,7 +102,7 @@ AI coding agents are amnesiacs. They repeat the same mistakes across sessions �
                        ▼
               ┌─────────────────┐        ┌──────────────┐
               │    Postgres     │        │  LLM API     │
-              │  (Supabase)     │        │ (structured  │
+              │  (Neon)         │        │ (structured  │
               └─────────────────┘        │   output)    │
                                          └──────────────┘
 ```
@@ -111,7 +111,7 @@ AI coding agents are amnesiacs. They repeat the same mistakes across sessions �
 
 - **No sign-in for judges** — public demo is read-only with seeded real scars; writes (app + MCP) are bearer-token gated for the owner.
 - **Stateless MCP** on Vercel (each POST self-contained) — no SSE session state to babysit on judging day.
-- **`DEMO_MODE` from day 1** — a pre-baked structuring response behind a flag so the live generation demo can't die on an API outage.
+- **No pre-baked fallback** — every capture runs the real pipeline against the real DB. If structuring fails, the raw dictation is saved as `unstructured` (nothing is lost) and can be retried; we never fabricate a card.
 - **Determinism over cleverness** — keyword/tag search, not embeddings; the rules-file export guarantees lessons land even if an agent skips the MCP call.
 
 ## 5. Tech stack
@@ -120,8 +120,8 @@ AI coding agents are amnesiacs. They repeat the same mistakes across sessions �
 |---|---|---|
 | Framework | **Next.js (App Router) + TypeScript** | Full-stack in one deploy; Vercel-native |
 | UI | Tailwind CSS | Speed; the lesson card is the money shot |
-| DB | **Supabase Postgres + Drizzle ORM** | Zero-ops, typed schema, free tier |
-| LLM | **Gemini via Vercel AI SDK** (structured output / zod) | Reliable schema-constrained extraction |
+| DB | **Neon Postgres + Drizzle ORM** (provisioned via Vercel Marketplace) | Zero-ops, typed schema, free tier |
+| LLM | **Gemini (`gemini-3-flash-preview`) via Vercel AI SDK** (structured output / zod) | Reliable schema-constrained extraction |
 | MCP | **`@modelcontextprotocol/sdk`** — streamable HTTP, stateless route | The 2026-standard way agents consume tools |
 | Dictation | **Wispr Flow** | The capture layer; the hackathon's thesis |
 | Hosting | **Vercel** | Live-link-on-judging-day reliability |
@@ -134,7 +134,7 @@ AI coding agents are amnesiacs. They repeat the same mistakes across sessions �
 | Phase | Days | Work | Exit criteria |
 |---|---|---|---|
 | **0. Spec by voice** | Day 1 | Dictate this entire spec into Wispr Flow; register; scaffold | This repo exists; spec dictated |
-| **1. Core pipeline** | Days 2–3 | Paste → LLM → lesson card; `DEMO_MODE` fallback; seed script | Card renders from dictated text |
+| **1. Core pipeline** | Days 2–3 | Paste → LLM → lesson card; honest-failure + retry path; real captures only | Card renders from dictated text |
 | **2. Memory UI** | Days 4–5 | Search, tags, closed loop, landing page (zero jargon, zero sign-in) | Judge-usable in 60s |
 | **3. MCP server** | Day 6 | Stateless `/mcp` route; test with MCP Inspector → real Claude Code | Agent queries memory live |
 | **4. Rules export** | Day 7 | CLAUDE.md/.cursorrules generator | Lesson lands deterministically |
@@ -151,7 +151,7 @@ AI coding agents are amnesiacs. They repeat the same mistakes across sessions �
 |---|---|
 | **Real problem in your work** | Documented above from this developer's own workflow (see also `passthru` — measuring what dictation loses on the way to coding agents). Dogfooding makes the evidence undeniable. |
 | **Wispr used meaningfully (build AND workflow)** | Build: spec, prompts, commit messages, lessons — all dictated. Workflow: the product's intake *is* Wispr dictation; the tool is unusable without voice. |
-| **It works (live link, no sign-in)** | Read-only seeded demo, openable in one click, `DEMO_MODE` fallback for every external dependency. |
+| **It works (live link, no sign-in)** | Public demo openable in one click; every capture runs the real LLM→DB pipeline (no canned output); failures degrade honestly to a retryable raw entry. |
 | **Clear 2-min demo** | The before/after swerve: agent repeats mistake → agent quotes the lesson and swerves. Pre-recorded, captioned, no live-API roulette. |
 | **Bonus: usage + social** | Lesson capture is word-dense by nature; every scar is a #NoHandsChallenge post. |
 
@@ -161,11 +161,11 @@ AI coding agents are amnesiacs. They repeat the same mistakes across sessions �
 - [x] Project blueprint (this repo)
 - [x] Register for the challenge + Wispr Flow Pro
 - [x] Spec dictated into Wispr Flow
-- [ ] Day 1: scaffold Next.js app
-- [ ] Core pipeline: paste → structure → card
+- [x] Day 1: scaffold Next.js app
+- [x] Core pipeline: paste → structure → card (live on Vercel)
 - [ ] Memory UI + landing
 - [ ] MCP server (`/mcp`)
-- [ ] Rules-file export
+- [x] Rules-file export (`/api/export/claude-md`, `/api/export/cursorrules` — live)
 - [ ] Dogfood 30+ real scars
 - [ ] Demo video
 - [ ] Submit
@@ -177,6 +177,7 @@ AI coding agents are amnesiacs. They repeat the same mistakes across sessions �
 | 2026-10-16 | Research verdict finalized after competitive sweep (Speqify/BugIt killed the naive idea; agent-memory gap found). Council round 2: 5/5 proceed. Repo created with full blueprint. |
 | 2026-10-16 | Council round 3: passthru (existing project) scored head-to-head vs scar-tissue → **4–1 for scar-tissue**. Passthru not submitted (predates challenge); folded in as prior work + measurement spine. See `docs/research/PASSTHRU-COMPARISON.md`. |
 | 2026-10-16 | **Stage 0+1 code complete**: Next.js 16 app in `web/` — shared zod Lesson schema, Drizzle + Neon Postgres (provisioned via Vercel Marketplace), live Gemini structuring pipeline (`web/src/lib/llm.ts`) with retries + honest-failure path (raw dictate saved as `unstructured`, retry endpoint), capture page, memory search page, live rules export (`/api/export/claude-md`, `/api/export/cursorrules`), IP rate-limit. **Pending: real GEMINI_API_KEY** (the one on disk is a placeholder) — then end-to-end live test + Vercel deploy. |
+| 2026-10-17 | **Stage 1 live end-to-end on production.** Key auth verified (`AQ.`-format key works via `x-goog-api-key`); model moved to `gemini-3-flash-preview` (`gemini-2.5-flash` is retired for new accounts); AI SDK v4 fix — API key belongs on `createGoogle(...)`, not the per-call model fn. Fixed a production-only failure caused by a quoted key value being pushed to Vercel (normalized `.env.local`, re-added env). Deployed to Vercel (`web/` root); disabled Deployment Protection so the URL is public. **Verified live on prod**: real dictation → structured card (201 in ~5s), search, tag filter, rules export, and the retry loop (`unstructured` → `open`). DB cleaned to 4 real lessons. Prod: https://scar-tissue-main-ec61.vercel.app |
 
 ---
 

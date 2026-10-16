@@ -1,5 +1,5 @@
 import { generateObject } from "ai";
-import { google } from "@ai-sdk/google";
+import { createGoogle } from "@ai-sdk/google";
 import { lessonSchema, type LessonStructured } from "./schema";
 
 /**
@@ -46,7 +46,8 @@ export async function structureLesson(
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
-      const model = google(process.env.GEMINI_MODEL || "gemini-2.5-flash");
+      const google = createGoogle({ apiKey: process.env.GEMINI_API_KEY });
+      const model = google(process.env.GEMINI_MODEL || "gemini-3-flash-preview");
       const { object } = await generateObject({
         model,
         schema: lessonSchema,
@@ -84,4 +85,15 @@ export async function structureLesson(
     `Structuring failed after ${MAX_RETRIES + 1} attempts. Your dictation was saved and can be retried — nothing is lost.`,
     lastError
   );
+}
+
+/** Observability: log the real cause so failures are diagnosable in production. */
+export function describeStructuringError(err: unknown): string {
+  if (err instanceof StructuringError) {
+    const c = err.cause;
+    const detail =
+      c instanceof Error ? c.message : c ? String(c) : "unknown cause";
+    return `${err.message} [cause: ${detail.slice(0, 300)}]`;
+  }
+  return err instanceof Error ? err.message : String(err);
 }

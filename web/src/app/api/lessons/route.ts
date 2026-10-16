@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { lessons } from "@/db/schema";
-import { structureLesson, StructuringError, isMeaningfulLesson } from "@/lib/llm";
+import { structureLesson, StructuringError, isMeaningfulLesson, describeStructuringError } from "@/lib/llm";
 import { rateLimit, clientIp } from "@/lib/ratelimit";
 import { lessonRowSchema, type LessonRow } from "@/lib/schema";
 import { desc, ilike, or, sql, and, eq } from "drizzle-orm";
@@ -74,6 +74,8 @@ export async function POST(req: Request) {
     const isStructuringFailure = err instanceof StructuringError;
     if (!isStructuringFailure) {
       console.error("unexpected capture error", err);
+    } else {
+      console.error("structuring error:", describeStructuringError(err));
     }
     try {
       const [row] = await db
