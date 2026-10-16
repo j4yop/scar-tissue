@@ -176,6 +176,7 @@ AI coding agents are amnesiacs. They repeat the same mistakes across sessions �
 |---|---|
 | 2026-10-16 | Research verdict finalized after competitive sweep (Speqify/BugIt killed the naive idea; agent-memory gap found). Council round 2: 5/5 proceed. Repo created with full blueprint. |
 | 2026-10-16 | Council round 3: passthru (existing project) scored head-to-head vs scar-tissue → **4–1 for scar-tissue**. Passthru not submitted (predates challenge); folded in as prior work + measurement spine. See `docs/research/PASSTHRU-COMPARISON.md`. |
+| 2026-10-16 | **Stage 0+1 code complete**: Next.js 16 app in `web/` — shared zod Lesson schema, Drizzle + Neon Postgres (provisioned via Vercel Marketplace), live Gemini structuring pipeline (`web/src/lib/llm.ts`) with retries + honest-failure path (raw dictate saved as `unstructured`, retry endpoint), capture page, memory search page, live rules export (`/api/export/claude-md`, `/api/export/cursorrules`), IP rate-limit. **Pending: real GEMINI_API_KEY** (the one on disk is a placeholder) — then end-to-end live test + Vercel deploy. |
 
 ---
 
