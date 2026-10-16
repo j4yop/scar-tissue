@@ -1,3 +1,5 @@
+import { RecentScars } from "@/components/RecentScars";
+
 export default function Home() {
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col justify-center px-6 py-16">
@@ -17,7 +19,22 @@ export default function Home() {
         into an imperative rule your agents search mid-task.
       </p>
 
-      <div className="mt-10 flex flex-wrap gap-4">
+      <div className="mt-8 grid gap-3 sm:grid-cols-3">
+        {[
+          ["1 · Dictate", "Hold Wispr Flow. Say what broke, why, what to do instead."],
+          ["2 · Structure", "One live LLM pass → an imperative lesson card."],
+          ["3 · Serve", "Agents pull it over MCP, or read the generated rules file."],
+        ].map(([title, body]) => (
+          <div key={title} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-orange-400">
+              {title}
+            </p>
+            <p className="mt-1 text-xs leading-relaxed text-zinc-500">{body}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-10 flex flex-wrap gap-3">
         <a
           href="/capture"
           className="rounded-xl bg-orange-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-orange-500"
@@ -44,7 +61,14 @@ export default function Home() {
         </a>
       </div>
 
-      <p className="mt-12 text-xs text-zinc-600">
+      <section className="mt-12 rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+        <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+          latest scars (live)
+        </p>
+        <RecentScars />
+      </section>
+
+      <p className="mt-10 text-xs text-zinc-600">
         no sign-in · nothing hardcoded — every capture runs the live structuring
         pipeline · MCP server + rules export live
       </p>
