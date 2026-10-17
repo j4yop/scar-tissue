@@ -46,5 +46,15 @@ These are bugs we actually hit and fixed in this repo. Dictate the ones that rin
 | Date | Count | Notes |
 |---|---|---|
 | 2026-10-17 | 3 imported + 5 captured | Seed from build session + Scratchpad import. Replace/augment with fresh dictation as we dogfood. |
+| 2026-10-17 | +4 dictated (real, by the developer) | From the build session's own bugs — see below. Voice artifacts ("surrounding code", "create Google") were un-tangled by the live pipeline; nothing fabricated. |
 
-*(This table grows as we dictate. Aim for 30+ before the demo video.)*
+### 2026-10-17 — first real dictation batch
+
+| id | rule |
+|---|---|
+| `ls_7cf829288ff3` | Always normalize environment variable values by removing surrounding quotes or whitespace before staging or pushing to Vercel. |
+| `ls_f591b4408094` | Use `gemini-3-flash-preview` or the `latest` alias instead of pinning `gemini-2.5-flash`. |
+| `ls_46aa846c96f6` | Pass the Google API key to the `createGoogle` provider init, not the per-call model function. |
+| `ls_1836ab80c134` | Remove `export const dynamic` / `runtime` from route handlers in Next.js 16 with cache components. |
+
+*(Total: 12. Aim for 30+ before the demo video.)*
