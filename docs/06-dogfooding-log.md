@@ -51,6 +51,7 @@ These are bugs we actually hit and fixed in this repo. Dictate the ones that rin
 | 2026-10-18 | 3 corrected via **Edit** | `ls_0ef1e4b46669` (field name → `allowBuilds`), `ls_d0d718187a8e` ("Mac reporter" → `mcporter`), `ls_83ec0301f736` ("exports" → "excerpts"). |
 | 2026-10-18 | **−6 (data hygiene)** | Removed 5 synthetic seed cards (one literally read *"this is a test dictation"*) + 1 duplicate cache-key card, via a direct DB script — no public delete endpoint. No fabricated scar ships. |
 | 2026-10-18 | **13 real scars (10 open · 3 closed)** | Closed 3 by their genuinely shipped fixes: `x-goog-api-key`, Vercel Deployment Protection, pnpm `allowBuilds`. |
+| 2026-10-18 | +1 dictated (real, **agent-found**) | `ls_cb9f56af9832` — `search_memory` matched the whole query as one substring, so multi-word queries returned nothing. Found by connecting a real agent to the live MCP server, then fixed. |
 
 ### Data hygiene — the samples are gone
 

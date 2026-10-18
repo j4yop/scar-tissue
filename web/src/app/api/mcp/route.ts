@@ -37,7 +37,7 @@ const handler = createMcpHandler(
             .string()
             .optional()
             .describe(
-              "Keywords: technology, symptom, or concept, e.g. 'stripe webhook retry'"
+              "Keywords: technology, symptom, or concept, e.g. 'stripe webhook retry'. Multi-word is fine — terms are matched individually and ranked."
             ),
           tags: z
             .array(z.string())
@@ -64,7 +64,7 @@ const handler = createMcpHandler(
             content: [
               {
                 type: "text" as const,
-                text: "No scar tissue found for that query — the developer hasn't dictated a lesson about this yet. Proceed from first principles.",
+                text: "No scars matched those keywords. Try fewer or broader terms (e.g. 'cache tenant', 'webhook retry'). Nothing has been recorded on this topic yet — proceed from first principles.",
               },
             ],
           };

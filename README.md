@@ -167,10 +167,10 @@ AI coding agents are amnesiacs. They repeat the same mistakes across sessions �
 - [x] Day 1: scaffold Next.js app
 - [x] Core pipeline: paste → structure → card (live on Vercel)
 - [x] Memory UI + landing (search, tag + status filters, close-the-loop fix note, retry, **edit a card**)
-- [x] MCP server (`/api/mcp` — `search_memory`, `get_lesson`, `memory_stats`; live on prod)
+- [x] MCP server (`/api/mcp` — `search_memory`, `get_lesson`, `memory_stats`; live on prod) — **exit criterion met: verified with a real agent** (`opencode mcp add`), which immediately exposed and fixed a search bug
 - [x] Wispr-native intake (`/import` — reads Wispr Flow Scratchpad over Wispr's MCP, owner-only)
 - [x] Rules-file export (`/api/export/claude-md`, `/api/export/cursorrules` — live) + `/connect` page
-- [~] Dogfood **real** scars — 13 and counting, every card traceable to a bug that actually happened (synthetic samples purged; a fabricated card is worse than a smaller memory)
+- [~] Dogfood **real** scars — 14 and counting, every card traceable to a bug that actually happened (synthetic samples purged; a fabricated card is worse than a smaller memory)
 - [ ] Demo video
 - [ ] Submit
 
@@ -187,6 +187,7 @@ AI coding agents are amnesiacs. They repeat the same mistakes across sessions �
 | 2026-10-17 | **Stage 4 — Wispr-native intake.** `src/lib/wispr.ts` speaks Wispr Flow's MCP (Streamable HTTP, 2026-07-28) directly; `/api/wispr/notes` lists your Scratchpad and `/api/wispr/import` fetches a note, splits it into rule-sized segments, runs the live structuring pipeline on each, and inserts every card (with a time budget + honest "skipped" count). New `/import` page. Owner-only: token resolves from `WISPR_TOKEN` or the local `mcporter` store; public deployment shows an honest "not connected" state. Verified locally: 34 Scratchpad notes listed, one note imported → 3 real cards. |
 | 2026-10-18 | **Dogfooding + edit.** Dictated the build session's own bugs through the live pipeline (18 scars). The structuring pass occasionally bakes in a voice artifact (`q.google`, "Mac reporter", "exports") or invents a field name, so `PATCH /api/lessons/[id]` now accepts **field-level corrections** (rule/wrong/right/why/tags/context) and the card has an **Edit** mode. Used it to fix three cards on prod. |
 | 2026-10-18 | **Truth pass.** Audited every card's raw transcript: 5 of 19 were synthetic early examples and 2 were near-duplicates → all 6 deleted via a direct DB script (no public delete route). Memory is now **13 real scars (10 open · 3 closed)**, with 3 closed by their genuinely shipped fixes. README corrected where it overstated write-gating. |
+| 2026-10-18 | **Phase 3 exit criterion met — MCP verified with a real agent.** Registered the live server with `opencode mcp add` (and in Claude Code, though it isn't authenticated on this machine) — `memory_stats` / `search_memory` appear as native tools in the agent's catalog. The *first real query* exposed a genuine bug: `search_memory` did a single `ILIKE '%<whole query>%'`, so natural-language queries returned **zero** hits while telling the agent to "proceed from first principles". Rewrote `searchLessons` to tokenize the query, match term-by-term, and rank deterministically by field (rule > tags > why > wrong/right > raw) — no embeddings. Verified on prod: `cache keys tenant id` → Redis-tenant scar, `stripe webhook failing silently` → webhook scar, `vercel deploy protection judges` → deployment-protection scar. Captured the bug itself as scar `ls_cb9f56af9832`. |
 
 ---
 
