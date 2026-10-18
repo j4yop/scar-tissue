@@ -49,6 +49,12 @@ These are bugs we actually hit and fixed in this repo. Dictate the ones that rin
 | 2026-10-17 | +4 dictated (real, by the developer) | From the build session's own bugs — see below. Voice artifacts ("surrounding code", "create Google") were un-tangled by the live pipeline; nothing fabricated. |
 | 2026-10-18 | +5 dictated (real) | AQ-key header, pnpm build scripts, `\| head` SIGPIPE, Vercel Deployment Protection, Scratchpad excerpts, tenant cache keys, mcporter 7-day tokens. |
 | 2026-10-18 | 3 corrected via **Edit** | `ls_0ef1e4b46669` (field name → `allowBuilds`), `ls_d0d718187a8e` ("Mac reporter" → `mcporter`), `ls_83ec0301f736` ("exports" → "excerpts"). |
+| 2026-10-18 | **−6 (data hygiene)** | Removed 5 synthetic seed cards (one literally read *"this is a test dictation"*) + 1 duplicate cache-key card, via a direct DB script — no public delete endpoint. No fabricated scar ships. |
+| 2026-10-18 | **13 real scars (10 open · 3 closed)** | Closed 3 by their genuinely shipped fixes: `x-goog-api-key`, Vercel Deployment Protection, pnpm `allowBuilds`. |
+
+### Data hygiene — the samples are gone
+
+During dogfooding we found that 5 of the 19 cards were **synthetic examples** written early (not real scars) and 2 pairs were near-duplicates. In a product whose whole claim is *no fake data*, a judge clicking "raw dictation" and reading *"this is a test dictation"* is the worst possible outcome — so they were deleted and the close-the-loop state was rebuilt from **real, actually-shipped fixes**. Every card in the memory now maps to a bug that really happened.
 
 ### 2026-10-17 — first real dictation batch
 

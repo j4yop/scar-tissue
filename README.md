@@ -111,7 +111,7 @@ AI coding agents are amnesiacs. They repeat the same mistakes across sessions �
 
 **Key decisions:**
 
-- **No sign-in for judges** — public demo is read-only with seeded real scars; writes (app + MCP) are bearer-token gated for the owner.
+- **No sign-in for judges** — the capture → structure → search/export loop is open on the public demo so a judge gets a *real* write, not a canned one. The one owner-only surface is **Wispr import** (`/import`), because it reads your private Scratchpad and must never carry a token on prod.
 - **Stateless MCP** on Vercel (each POST self-contained) — no SSE session state to babysit on judging day.
 - **No pre-baked fallback** — every capture runs the real pipeline against the real DB. If structuring fails, the raw dictation is saved as `unstructured` (nothing is lost) and can be retried; we never fabricate a card.
 - **Wispr-native intake** — `/import` reads your **Wispr Flow Scratchpad** over Wispr's own MCP server (`api.wisprflow.ai/connect/mcp`, OAuth-gated), so a note you already dictated becomes lesson cards without retyping. Owner-only: it resolves a real Wispr token locally, and degrades honestly to "not connected" on the public deployment.
@@ -170,7 +170,7 @@ AI coding agents are amnesiacs. They repeat the same mistakes across sessions �
 - [x] MCP server (`/api/mcp` — `search_memory`, `get_lesson`, `memory_stats`; live on prod)
 - [x] Wispr-native intake (`/import` — reads Wispr Flow Scratchpad over Wispr's MCP, owner-only)
 - [x] Rules-file export (`/api/export/claude-md`, `/api/export/cursorrules` — live) + `/connect` page
-- [ ] Dogfood 30+ real scars
+- [~] Dogfood **real** scars — 13 and counting, every card traceable to a bug that actually happened (synthetic samples purged; a fabricated card is worse than a smaller memory)
 - [ ] Demo video
 - [ ] Submit
 
@@ -186,6 +186,7 @@ AI coding agents are amnesiacs. They repeat the same mistakes across sessions �
 | 2026-10-17 | **Stage 3 — MCP server + connect page live.** `mcp-handler` v2 (`@modelcontextprotocol/server` v2, zod 4 — the current 2026-07-28 spec, stateless, with the 2025 streamable-HTTP fallback) serves read-only tools `search_memory`, `get_lesson`, `memory_stats` from the same live DB. Extracted `src/lib/lessons.ts` so the API and MCP share one search implementation. New `/connect` page (MCP URL + config snippets for HTTP/stdio clients + rules-file links). Verified on prod: `initialize`, `tools/list`, `tools/call` all return real data. |
 | 2026-10-17 | **Stage 4 — Wispr-native intake.** `src/lib/wispr.ts` speaks Wispr Flow's MCP (Streamable HTTP, 2026-07-28) directly; `/api/wispr/notes` lists your Scratchpad and `/api/wispr/import` fetches a note, splits it into rule-sized segments, runs the live structuring pipeline on each, and inserts every card (with a time budget + honest "skipped" count). New `/import` page. Owner-only: token resolves from `WISPR_TOKEN` or the local `mcporter` store; public deployment shows an honest "not connected" state. Verified locally: 34 Scratchpad notes listed, one note imported → 3 real cards. |
 | 2026-10-18 | **Dogfooding + edit.** Dictated the build session's own bugs through the live pipeline (18 scars). The structuring pass occasionally bakes in a voice artifact (`q.google`, "Mac reporter", "exports") or invents a field name, so `PATCH /api/lessons/[id]` now accepts **field-level corrections** (rule/wrong/right/why/tags/context) and the card has an **Edit** mode. Used it to fix three cards on prod. |
+| 2026-10-18 | **Truth pass.** Audited every card's raw transcript: 5 of 19 were synthetic early examples and 2 were near-duplicates → all 6 deleted via a direct DB script (no public delete route). Memory is now **13 real scars (10 open · 3 closed)**, with 3 closed by their genuinely shipped fixes. README corrected where it overstated write-gating. |
 
 ---
 
