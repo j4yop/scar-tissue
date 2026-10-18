@@ -13,8 +13,17 @@ export function LessonCard({ lesson }: { lesson: LessonRow }) {
   const [current, setCurrent] = useState<LessonRow>(lesson);
   const [copied, setCopied] = useState(false);
   const [fixNote, setFixNote] = useState("");
-  const [busy, setBusy] = useState<null | "retry" | "close">(null);
+  const [busy, setBusy] = useState<null | "retry" | "close" | "edit">(null);
   const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState({
+    rule: "",
+    wrong: "",
+    right: "",
+    why: "",
+    tags: "",
+    context: "",
+  });
 
   const copy = async () => {
     await navigator.clipboard.writeText(lessonToMarkdown(current));
@@ -58,6 +67,49 @@ export function LessonCard({ lesson }: { lesson: LessonRow }) {
     }
   };
 
+  const startEdit = () => {
+    setError(null);
+    setDraft({
+      rule: current.rule,
+      wrong: current.wrong,
+      right: current.right,
+      why: current.why,
+      tags: current.tags.join(", "),
+      context: current.context,
+    });
+    setEditing(true);
+  };
+
+  const saveEdit = async () => {
+    setBusy("edit");
+    setError(null);
+    try {
+      const res = await fetch(`/api/lessons/${current.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          rule: draft.rule.trim(),
+          wrong: draft.wrong.trim(),
+          right: draft.right.trim(),
+          why: draft.why.trim(),
+          context: draft.context.trim() || "general",
+          tags: draft.tags
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Could not save changes");
+      setCurrent(data.lesson);
+      setEditing(false);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not save changes");
+    } finally {
+      setBusy(null);
+    }
+  };
+
   return (
     <article className="animate-[fadeIn_0.4s_ease-out] rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-xl shadow-black/20 backdrop-blur">
       <header className="mb-4 flex flex-wrap items-center gap-3">
@@ -72,58 +124,147 @@ export function LessonCard({ lesson }: { lesson: LessonRow }) {
         <span className="ml-auto font-mono text-xs text-zinc-600">{current.id}</span>
       </header>
 
-      {current.rule && (
-        <h3 className="mb-4 text-lg font-semibold leading-snug text-zinc-100">
-          {current.rule}
-        </h3>
-      )}
-
-      <div className="space-y-2.5 text-sm leading-relaxed">
-        {current.wrong && (
-          <p className="flex gap-2">
-            <span aria-hidden>❌</span>
-            <span className="text-zinc-400">
-              <b className="font-medium text-rose-300/90">Wrong:</b> {current.wrong}
+      {editing ? (
+        <div className="space-y-3">
+          <label className="block">
+            <span className="mb-1 block text-xs uppercase tracking-wide text-zinc-500">
+              Rule
             </span>
-          </p>
-        )}
-        {current.right && (
-          <p className="flex gap-2">
-            <span aria-hidden>✅</span>
-            <span className="text-zinc-400">
-              <b className="font-medium text-emerald-300/90">Right:</b> {current.right}
+            <textarea
+              value={draft.rule}
+              onChange={(e) => setDraft((d) => ({ ...d, rule: e.target.value }))}
+              rows={2}
+              className="w-full resize-y rounded-lg border border-white/10 bg-white/[0.03] p-2.5 text-sm text-zinc-200 focus:border-white/25 focus:outline-none"
+            />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs uppercase tracking-wide text-zinc-500">
+              Wrong
             </span>
-          </p>
-        )}
-        {current.why && (
-          <p className="flex gap-2">
-            <span aria-hidden>🧠</span>
-            <span className="text-zinc-400">
-              <b className="font-medium text-sky-300/90">Why:</b> {current.why}
+            <textarea
+              value={draft.wrong}
+              onChange={(e) => setDraft((d) => ({ ...d, wrong: e.target.value }))}
+              rows={2}
+              className="w-full resize-y rounded-lg border border-white/10 bg-white/[0.03] p-2.5 text-sm text-zinc-300 focus:border-white/25 focus:outline-none"
+            />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs uppercase tracking-wide text-zinc-500">
+              Right
             </span>
-          </p>
-        )}
-        {current.fixNote && (
-          <p className="flex gap-2">
-            <span aria-hidden>🔧</span>
-            <span className="text-zinc-400">
-              <b className="font-medium text-zinc-300">Fix:</b> {current.fixNote}
+            <textarea
+              value={draft.right}
+              onChange={(e) => setDraft((d) => ({ ...d, right: e.target.value }))}
+              rows={2}
+              className="w-full resize-y rounded-lg border border-white/10 bg-white/[0.03] p-2.5 text-sm text-zinc-300 focus:border-white/25 focus:outline-none"
+            />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs uppercase tracking-wide text-zinc-500">
+              Why
             </span>
-          </p>
-        )}
-      </div>
-
-      {current.tags.length > 0 && (
-        <footer className="mt-4 flex flex-wrap gap-2">
-          {current.tags.map((t) => (
-            <span
-              key={t}
-              className="rounded-md bg-white/5 px-2 py-0.5 font-mono text-xs text-zinc-400"
+            <textarea
+              value={draft.why}
+              onChange={(e) => setDraft((d) => ({ ...d, why: e.target.value }))}
+              rows={2}
+              className="w-full resize-y rounded-lg border border-white/10 bg-white/[0.03] p-2.5 text-sm text-zinc-300 focus:border-white/25 focus:outline-none"
+            />
+          </label>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="block">
+              <span className="mb-1 block text-xs uppercase tracking-wide text-zinc-500">
+                Tags (comma-separated)
+              </span>
+              <input
+                value={draft.tags}
+                onChange={(e) => setDraft((d) => ({ ...d, tags: e.target.value }))}
+                className="w-full rounded-lg border border-white/10 bg-white/[0.03] p-2.5 text-sm text-zinc-300 focus:border-white/25 focus:outline-none"
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-xs uppercase tracking-wide text-zinc-500">
+                Context
+              </span>
+              <input
+                value={draft.context}
+                onChange={(e) => setDraft((d) => ({ ...d, context: e.target.value }))}
+                className="w-full rounded-lg border border-white/10 bg-white/[0.03] p-2.5 text-sm text-zinc-300 focus:border-white/25 focus:outline-none"
+              />
+            </label>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={saveEdit}
+              disabled={busy !== null || draft.rule.trim().length < 5}
+              className="rounded-lg border border-orange-500/40 bg-orange-600/20 px-3 py-1.5 text-xs text-orange-200 transition hover:bg-orange-600/30 disabled:opacity-40"
             >
-              #{t}
-            </span>
-          ))}
-        </footer>
+              {busy === "edit" ? "Saving…" : "Save changes"}
+            </button>
+            <button
+              onClick={() => setEditing(false)}
+              disabled={busy !== null}
+              className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-zinc-400 transition hover:bg-white/5 disabled:opacity-40"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          {current.rule && (
+            <h3 className="mb-4 text-lg font-semibold leading-snug text-zinc-100">
+              {current.rule}
+            </h3>
+          )}
+
+          <div className="space-y-2.5 text-sm leading-relaxed">
+            {current.wrong && (
+              <p className="flex gap-2">
+                <span aria-hidden>❌</span>
+                <span className="text-zinc-400">
+                  <b className="font-medium text-rose-300/90">Wrong:</b> {current.wrong}
+                </span>
+              </p>
+            )}
+            {current.right && (
+              <p className="flex gap-2">
+                <span aria-hidden>✅</span>
+                <span className="text-zinc-400">
+                  <b className="font-medium text-emerald-300/90">Right:</b> {current.right}
+                </span>
+              </p>
+            )}
+            {current.why && (
+              <p className="flex gap-2">
+                <span aria-hidden>🧠</span>
+                <span className="text-zinc-400">
+                  <b className="font-medium text-sky-300/90">Why:</b> {current.why}
+                </span>
+              </p>
+            )}
+            {current.fixNote && (
+              <p className="flex gap-2">
+                <span aria-hidden>🔧</span>
+                <span className="text-zinc-400">
+                  <b className="font-medium text-zinc-300">Fix:</b> {current.fixNote}
+                </span>
+              </p>
+            )}
+          </div>
+
+          {current.tags.length > 0 && (
+            <footer className="mt-4 flex flex-wrap gap-2">
+              {current.tags.map((t) => (
+                <span
+                  key={t}
+                  className="rounded-md bg-white/5 px-2 py-0.5 font-mono text-xs text-zinc-400"
+                >
+                  #{t}
+                </span>
+              ))}
+            </footer>
+          )}
+        </>
       )}
 
       {error && (
@@ -180,6 +321,14 @@ export function LessonCard({ lesson }: { lesson: LessonRow }) {
         >
           {copied ? "Copied ✓" : "Copy as markdown"}
         </button>
+        {current.status !== "unstructured" && !editing && (
+          <button
+            onClick={startEdit}
+            className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-zinc-300 transition hover:border-white/25 hover:bg-white/5"
+          >
+            Edit
+          </button>
+        )}
         <details className="text-xs text-zinc-600">
           <summary className="cursor-pointer select-none hover:text-zinc-400">
             raw dictation

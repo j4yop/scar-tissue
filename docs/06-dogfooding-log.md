@@ -47,6 +47,8 @@ These are bugs we actually hit and fixed in this repo. Dictate the ones that rin
 |---|---|---|
 | 2026-10-17 | 3 imported + 5 captured | Seed from build session + Scratchpad import. Replace/augment with fresh dictation as we dogfood. |
 | 2026-10-17 | +4 dictated (real, by the developer) | From the build session's own bugs — see below. Voice artifacts ("surrounding code", "create Google") were un-tangled by the live pipeline; nothing fabricated. |
+| 2026-10-18 | +5 dictated (real) | AQ-key header, pnpm build scripts, `\| head` SIGPIPE, Vercel Deployment Protection, Scratchpad excerpts, tenant cache keys, mcporter 7-day tokens. |
+| 2026-10-18 | 3 corrected via **Edit** | `ls_0ef1e4b46669` (field name → `allowBuilds`), `ls_d0d718187a8e` ("Mac reporter" → `mcporter`), `ls_83ec0301f736` ("exports" → "excerpts"). |
 
 ### 2026-10-17 — first real dictation batch
 

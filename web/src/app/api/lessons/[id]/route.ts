@@ -6,14 +6,25 @@ import { z } from "zod";
 
 export const maxDuration = 30;
 
-const patchSchema = z.object({
-  /** The closing note: how the scar was fixed / what shipped. Real text only. */
-  fixNote: z.string().min(1, "fix note is empty").max(1000),
-});
+const patchSchema = z
+  .object({
+    /** The closing note: how the scar was fixed / what shipped. Real text only. */
+    fixNote: z.string().min(1, "fix note is empty").max(1000).optional(),
+    /** Field-level corrections — fix a card the structuring pass got wrong. */
+    rule: z.string().min(5).max(300).optional(),
+    wrong: z.string().max(500).optional(),
+    right: z.string().max(500).optional(),
+    why: z.string().max(500).optional(),
+    tags: z.array(z.string().min(1).max(30)).max(6).optional(),
+    context: z.string().max(200).optional(),
+  })
+  .refine((d) => Object.values(d).some((v) => v !== undefined), {
+    message: "nothing to update",
+  });
 
 /**
- * Close the loop on a lesson: dictate back the fix, and the scar closes.
- * Real DB update — no simulation.
+ * Update a lesson: either close the loop (fixNote) or correct the structured
+ * fields by hand. Real DB update — no simulation.
  */
 export async function PATCH(
   req: Request,
@@ -31,7 +42,7 @@ export async function PATCH(
   const parsed = patchSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "A fix note is required to close a lesson." },
+      { error: "Nothing valid to update." },
       { status: 422 }
     );
   }
@@ -47,9 +58,19 @@ export async function PATCH(
     );
   }
 
+  const { fixNote, ...fields } = parsed.data;
+  const updates: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(fields)) {
+    if (value !== undefined) updates[key] = value;
+  }
+  if (fixNote !== undefined) {
+    updates.fixNote = fixNote;
+    updates.status = "closed";
+  }
+
   const [updated] = await db
     .update(lessons)
-    .set({ fixNote: parsed.data.fixNote, status: "closed" })
+    .set(updates)
     .where(eq(lessons.id, id))
     .returning();
 

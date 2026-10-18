@@ -166,7 +166,7 @@ AI coding agents are amnesiacs. They repeat the same mistakes across sessions �
 - [x] Spec dictated into Wispr Flow
 - [x] Day 1: scaffold Next.js app
 - [x] Core pipeline: paste → structure → card (live on Vercel)
-- [x] Memory UI + landing (search, tag + status filters, close-the-loop fix note, retry)
+- [x] Memory UI + landing (search, tag + status filters, close-the-loop fix note, retry, **edit a card**)
 - [x] MCP server (`/api/mcp` — `search_memory`, `get_lesson`, `memory_stats`; live on prod)
 - [x] Wispr-native intake (`/import` — reads Wispr Flow Scratchpad over Wispr's MCP, owner-only)
 - [x] Rules-file export (`/api/export/claude-md`, `/api/export/cursorrules` — live) + `/connect` page
@@ -185,6 +185,7 @@ AI coding agents are amnesiacs. They repeat the same mistakes across sessions �
 | 2026-10-17 | **Stage 2 — the memory loop closes.** `PATCH /api/lessons/[id]` accepts a dictated fix note (real DB update) and sets `status: closed`; the card gained a close-the-loop input and a "retry structuring" button for `unstructured` captures. Verified on prod: close (200), empty note (422), missing id (404), status filtering. |
 | 2026-10-17 | **Stage 3 — MCP server + connect page live.** `mcp-handler` v2 (`@modelcontextprotocol/server` v2, zod 4 — the current 2026-07-28 spec, stateless, with the 2025 streamable-HTTP fallback) serves read-only tools `search_memory`, `get_lesson`, `memory_stats` from the same live DB. Extracted `src/lib/lessons.ts` so the API and MCP share one search implementation. New `/connect` page (MCP URL + config snippets for HTTP/stdio clients + rules-file links). Verified on prod: `initialize`, `tools/list`, `tools/call` all return real data. |
 | 2026-10-17 | **Stage 4 — Wispr-native intake.** `src/lib/wispr.ts` speaks Wispr Flow's MCP (Streamable HTTP, 2026-07-28) directly; `/api/wispr/notes` lists your Scratchpad and `/api/wispr/import` fetches a note, splits it into rule-sized segments, runs the live structuring pipeline on each, and inserts every card (with a time budget + honest "skipped" count). New `/import` page. Owner-only: token resolves from `WISPR_TOKEN` or the local `mcporter` store; public deployment shows an honest "not connected" state. Verified locally: 34 Scratchpad notes listed, one note imported → 3 real cards. |
+| 2026-10-18 | **Dogfooding + edit.** Dictated the build session's own bugs through the live pipeline (18 scars). The structuring pass occasionally bakes in a voice artifact (`q.google`, "Mac reporter", "exports") or invents a field name, so `PATCH /api/lessons/[id]` now accepts **field-level corrections** (rule/wrong/right/why/tags/context) and the card has an **Edit** mode. Used it to fix three cards on prod. |
 
 ---
 
