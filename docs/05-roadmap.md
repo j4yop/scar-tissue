@@ -12,7 +12,7 @@ Every bug/lesson encountered while building Scar Tissue:
 3. Paste into Scar Tissue → card → tag.
 4. Screenshot if it's a good story.
 
-Targets: **30+ real scars**, tag diversity across React/Next/MCP/LLM/deploy. These entries are the seed data, the criterion-1 evidence, and the usage-card growth engine.
+Targets: **coverage of real scars** — every real bug from the build becomes a card (audited in `docs/06`: 12/12), plus as many as the developer genuinely has from their own work. *Superseded:* the original "30+" was set before we knew the build's true yield; padding the count with fabricated cards is explicitly out of bounds. Tag diversity across React/Next/MCP/LLM/deploy. These entries are the seed data, the criterion-1 evidence, and the usage-card growth engine.
 
 ## Demo video — 2:00 shot list
 

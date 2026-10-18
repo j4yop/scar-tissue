@@ -141,7 +141,7 @@ AI coding agents are amnesiacs. They repeat the same mistakes across sessions �
 | **2. Memory UI** | Days 4–5 | Search, tags, closed loop, landing page (zero jargon, zero sign-in) | Judge-usable in 60s |
 | **3. MCP server** | Day 6 | Stateless `/api/mcp` route; test with MCP Inspector → real Claude Code | Agent queries memory live |
 | **4. Rules export** | Day 7 | CLAUDE.md/.cursorrules generator | Lesson lands deterministically |
-| **5. Dogfood hard** | Days 8–9 | Every real bug/lesson from this build → dictated card (30+ entries) | Seed data is *real*; usage card grows |
+| **5. Dogfood hard** | Days 8–9 | Every real bug/lesson from this build → dictated card (audited: 12/12); count is a KPI, not the gate | Seed data is *real*; usage card grows |
 | **6. Demo video** | Day 10 | 2-min video, shot list in `docs/05-roadmap.md` | Swerve looks real, no cuts |
 | **7. Submit** | Day 11 | Link + video + Wispr usage card + writeup | Submitted early |
 | **8. Buffer** | Day 12 | Anything that slipped | — |
@@ -170,7 +170,7 @@ AI coding agents are amnesiacs. They repeat the same mistakes across sessions �
 - [x] MCP server (`/api/mcp` — `search_memory`, `get_lesson`, `memory_stats`; live on prod) — **exit criterion met: verified with a real agent** (`opencode mcp add`), which immediately exposed and fixed a search bug
 - [x] Wispr-native intake (`/import` — reads Wispr Flow Scratchpad over Wispr's MCP, owner-only)
 - [x] Rules-file export (`/api/export/claude-md`, `/api/export/cursorrules` — live) + `/connect` page
-- [~] Dogfood **real** scars — 14 and counting, every card traceable to a bug that actually happened (synthetic samples purged; a fabricated card is worse than a smaller memory)
+- [x] Dogfood **real** scars — coverage complete: **12/12 real bugs from this build captured** (audit in `docs/06`), +2 from the developer's own work = **14 scars**. Count is a KPI, not the gate — the old "30+" was set before we knew the build's true yield, and padding it would mean shipping fabricated cards
 - [ ] Demo video
 - [ ] Submit
 

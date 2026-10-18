@@ -57,6 +57,29 @@ These are bugs we actually hit and fixed in this repo. Dictate the ones that rin
 
 During dogfooding we found that 5 of the 19 cards were **synthetic examples** written early (not real scars) and 2 pairs were near-duplicates. In a product whose whole claim is *no fake data*, a judge clicking "raw dictation" and reading *"this is a test dictation"* is the worst possible outcome — so they were deleted and the close-the-loop state was rebuilt from **real, actually-shipped fixes**. Every card in the memory now maps to a bug that really happened.
 
+### Coverage audit — every real bug from this build is captured
+
+The phase-5 exit criterion is *coverage*, not a raw count: **every real bug/lesson encountered while building Scar Tissue becomes a dictated card.** Audited against the commit history, the build produced **12 distinct real bugs, and all 12 are captured:**
+
+| Real bug (from commits) | Card | Status |
+|---|---|---|
+| AI SDK v4 — API key belongs on `createGoogle()`, not per-call | `ls_46aa846c96f6` | open |
+| `gemini-2.5-flash` retired for new accounts | `ls_f591b4408094` | open |
+| Quoted env value pushed an invalid key to Vercel | `ls_7cf829288ff3` | open |
+| `AQ.` keys authenticate via `x-goog-api-key`, never Bearer | `ls_6c214bf62cde` | **closed** |
+| pnpm v12 blocks dependency build scripts (`ERR_PNPM_IGNORED_BUILDS`) | `ls_0ef1e4b46669` | **closed** |
+| Vercel Deployment Protection walls off judges | `ls_f2d58585d6cd` | **closed** |
+| Piping `next dev` into `head` → SIGPIPE kills the server | `ls_0ea0bd7795a0` | open |
+| Next.js 16 `cacheComponents` rejects `export const dynamic`/`runtime` | `ls_1836ab80c134` | open |
+| Scratchpad *search* returns excerpts, not the note body | `ls_83ec0301f736` | open |
+| `mcporter` Wispr tokens expire in 7 days | `ls_d0d718187a8e` | open |
+| Marketplace DB integration attached to the wrong project | `ls_a5b6495bbde3` | open |
+| `search_memory` matched the whole query as one substring | `ls_cb9f56af9832` | open |
+
+Plus 2 cards from the developer's **own work** (Redis tenant cache keys `ls_d097e05d8499`, Stripe webhook retries `ls_bed6e523e84d`) → **14 real scars total.**
+
+**On the "30+" target:** it was set before we knew this build would surface ~12 real bugs, and the only reason the memory briefly held 19 cards was that 5 of them were **fabricated**. Those were deleted — a fabricated card is worse than a smaller memory, especially in a product whose entire claim is *no fake data*. Reaching 30 honestly requires scars from the developer's **own work history**, not from this build. Count is a KPI here, not the gate.
+
 ### 2026-10-17 — first real dictation batch
 
 | id | rule |
